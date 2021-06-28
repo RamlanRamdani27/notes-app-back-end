@@ -53,13 +53,35 @@ class NotesHandler {
   }
 
   async getNotesHandler() {
-    const notes = await this._service.getNotes();
-    return {
-      status: 'success',
-      data: {
-        notes,
-      },
-    };
+    try {
+      const notes = await this._service.getNotes();
+      return {
+        status: 'success',
+        data: {
+          notes,
+        },
+      };
+    } catch (error) {
+      if (error instanceof ClientError) {
+        const response = h.response({
+          status: 'fail',
+          message: error.message,
+        });
+
+        response.code(error.statusCode);
+        return response;
+      }
+
+      // Server ERROR!
+      const response = h.response({
+        status: 'error',
+        message: 'Maaf, terjadi kegagalan pada server kami.',
+      });
+
+      response.code(500);
+      console.error(error);
+      return response;
+    }
   }
 
   async getNoteByIdHandler(request, h) {
