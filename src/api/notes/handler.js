@@ -58,7 +58,7 @@ class NotesHandler {
     }
   }
 
-  async getNotesHandler(request) {
+  async getNotesHandler(request, h) {
     try {
       const { id: credentialId } = request.auth.credentials;
       const notes = await this._service.getNotes(credentialId);
