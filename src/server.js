@@ -3,7 +3,6 @@ require('dotenv').config();
 
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
-const ClientError = require('./exceptions/ClientError');
 
 // notes
 const notes = require('./api/notes');
@@ -13,10 +12,10 @@ const NotesValidator = require('./validator/notes');
 // users
 const users = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
-const UserValidator = require('./validator/users');
+const UsersValidator = require('./validator/users');
 
 // authentications
-const authentications = require('./api/authentication');
+const authentications = require('./api/authentications');
 const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const TokenManager = require('./tokenize/TokenManager');
 const AuthenticationsValidator = require('./validator/authentications');
@@ -83,7 +82,7 @@ const init = async () => {
       plugin: users,
       options: {
         service: usersService,
-        validator: UserValidator,
+        validator: UsersValidator,
       },
     },
     {
