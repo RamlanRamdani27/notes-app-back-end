@@ -26,6 +26,11 @@ const collaborations = require('./api/collaborations');
 const CollaborationsService = require('./services/postgres/CollaborationsService');
 const CollaborationsValidator = require('./validator/collaborations');
 
+// Exports
+const _exports = require('./api/exports');
+const ProducerService = require('./services/rabbitmq/ProducerService');
+const ExportsValidator = require('./validator/exports');
+
 const init = async () => {
   const collaborationsService = new CollaborationsService();
   const notesService = new NotesService(collaborationsService);
@@ -40,33 +45,6 @@ const init = async () => {
         origin: ['*'],
       },
     },
-  });
-
-  // Di sini kamu bisa mendeklarasikan atau membuat extentions function untuk life cycle server onPreResponse,
-  // di mana ia akan mengintervensi response sebelum dikirimkan ke client. Di sana kamu bisa menetapkan
-  // error handling bila response tersebut merupakan client error.
-  server.ext('onPreResponse', (request, h) => {
-    // mendapatkan konteks response dari request
-
-    const { response } = request;
-
-    if (response instanceof ClientError) {
-      // membuat response baru dari response toolkit sesuai kebutuhan error handling
-
-      const newResponse = h.response({
-        status: 'fail',
-
-        message: response.message,
-      });
-
-      newResponse.code(response.statusCode);
-
-      return newResponse;
-    }
-
-    // jika bukan ClientError, lanjutkan dengan response sebelumnya (tanpa terintervensi)
-
-    return response.continue || response;
   });
 
   // registrasi plugin eksternal
@@ -123,6 +101,13 @@ const init = async () => {
         collaborationsService,
         notesService,
         validator: CollaborationsValidator,
+      },
+    },
+    {
+      plugin: _exports,
+      options: {
+        service: ProducerService,
+        validator: ExportsValidator,
       },
     },
   ]);
