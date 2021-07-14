@@ -4,3 +4,4 @@ package-lock.json
 notes-api-webserver.pem
 .env
 .prod.env
+src/api/uploads/file
