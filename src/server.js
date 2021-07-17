@@ -4,55 +4,59 @@ require('dotenv').config();
 const Hapi = require('@hapi/hapi');
 const Jwt = require('@hapi/jwt');
 const Inert = require('@hapi/inert');
+/* path untuk penymipanan local */
 // const path = require('path');
 
-// notes
+/* notes */
 const notes = require('./api/notes');
 const NotesService = require('./services/postgres/NotesService');
 const NotesValidator = require('./validator/notes');
 
-// users
+/* users */
 const users = require('./api/users');
 const UsersService = require('./services/postgres/UsersService');
 const UsersValidator = require('./validator/users');
 
-// authentications
+/* authentications */
 const authentications = require('./api/authentication');
 const AuthenticationsService = require('./services/postgres/AuthenticationsService');
 const TokenManager = require('./tokenize/TokenManager');
 const AuthenticationsValidator = require('./validator/authentications');
 
-// collaborations
+/* collaborations */
 const collaborations = require('./api/collaborations');
 const CollaborationsService = require('./services/postgres/CollaborationsService');
 const CollaborationsValidator = require('./validator/collaborations');
 
-// Exports
+/* Exports */
 const _exports = require('./api/exports');
 const ProducerService = require('./services/rabbitmq/ProducerService');
 const ExportsValidator = require('./validator/exports');
 
-// uploads
+/* uploads */
 const uploads = require('./api/uploads');
-// storage service local
+/* storage service local  */
 // const StorageService = require('./services/storage/StorageService');
-
-// storage service AWS
+/* storage service AWS  */
 const StorageService = require('./services/S3/StorageService');
 const UploadsValidator = require('./validator/uploads');
 
+/* cache */
+const CacheService = require('./services/redis/CacheService');
+
 const init = async () => {
-  const collaborationsService = new CollaborationsService();
-  const notesService = new NotesService(collaborationsService);
+  const cacheService = new CacheService();
+  const collaborationsService = new CollaborationsService(cacheService);
+  const notesService = new NotesService(collaborationsService, cacheService);
   const usersService = new UsersService();
   const authenticationsService = new AuthenticationsService();
 
-  // storage service local
+  /* storage service local */
   // const storageService = new StorageService(
   //   path.resolve(__dirname, 'api/uploads/file/images'),
   // );
 
-  // storage service AWS
+  /* storage service AWS */
   const storageService = new StorageService();
 
   const server = Hapi.server({
@@ -65,7 +69,7 @@ const init = async () => {
     },
   });
 
-  // registrasi plugin eksternal
+  /* registrasi plugin eksternal */
   await server.register([
     {
       plugin: Jwt,
@@ -75,7 +79,7 @@ const init = async () => {
     },
   ]);
 
-  // mendefinisikan strategy autentikasi jwt
+  /* mendefinisikan strategy autentikasi jwt */
   server.auth.strategy('notesapp_jwt', 'jwt', {
     keys: process.env.ACCESS_TOKEN_KEY,
     verify: {
