@@ -18,10 +18,10 @@ class UploadsHandler {
       const response = h.response({
         status: 'success',
         data: {
-          // storage local
+          /* storage local */
           // fileLocation: `http://${process.env.HOST}:${process.env.PORT}/upload/images/${filename}`,
 
-          // storage AWS
+          /* storage AWS */
           fileLocation: `http://${process.env.HOST}:${process.env.PORT}/upload/images/${filename}`,
         },
       });
